@@ -5,6 +5,7 @@
 #include <vector>
 #include <stdio.h>
 #include <cmath>
+#include <iostream>
 #include <algorithm>
 #include "pcap_parser.h"
 

@@ -10,7 +10,7 @@ std::vector<Window> Windowing::createWindows(const std::vector<Packet>& packets,
     double startTime = packets.front().timestamp;
     double endTime   = packets.back().timestamp;
 
-    int numWindows = static_cast<int>(std::ceil(endTime - startTime) / windowSize) + 1;
+    int numWindows = static_cast<int>(std::ceil((endTime - startTime) / windowSize)) + 1;
 
     windows.resize(numWindows);
 
@@ -39,6 +39,6 @@ std::vector<Window> Windowing::createWindows(const std::vector<Packet>& packets,
             windows[index].udpCount++;
         }
     }
-    
+
     return windows;
 }

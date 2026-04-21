@@ -3,6 +3,9 @@
 
 
 #include <vector>
+#include <stdio.h>
+#include <cmath>
+#include <algorithm>
 #include "pcap_parser.h"
 
 struct Window {
@@ -17,7 +20,7 @@ class Windowing{
 public:
     std::vector<Window> createWindows(
         const std::vector<Packet>& packets,
-        double windowsize
+        double windowSize
     );
 
 };

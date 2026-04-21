@@ -11,7 +11,6 @@ std::vector<std::vector<double>> MatrixBuilder::buildMatrix(const std::vector<Wi
             static_cast<double>(w.packetCount),
             static_cast<double>(w.totalBytes),
             static_cast<double>(w.tcpCount),
-            static_cast<double>(w.tcpCount),
             static_cast<double>(w.udpCount)
             };
 

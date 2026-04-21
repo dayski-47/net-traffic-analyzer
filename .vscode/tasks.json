@@ -7,9 +7,14 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "${workspaceFolder}\\src\\main.cpp",
+                "${workspaceFolder}\\src\\pcap_parser.cpp",
+                "${workspaceFolder}\\src\\windowing.cpp",
+                "${workspaceFolder}\\src\\linear_algebra.cpp",
+                "${workspaceFolder}\\src\\matrix_builder.cpp",
+                "${workspaceFolder}\\src\\cli_dashboard.cpp",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "${workspaceFolder}\\src\\output\\main.exe",
                 "-I", "C:\\Softwares\\Include",
                 "-L", "C:\\Softwares\\Lib\\x64",
                 "-lwpcap",
@@ -17,7 +22,7 @@
                 "-lws2_32"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [
                 "$gcc"

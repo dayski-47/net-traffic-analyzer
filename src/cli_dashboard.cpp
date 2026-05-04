@@ -1,92 +1,3 @@
-/* #include "cli_dashboard.h"
-#include <iostream>
-#include <iomanip>
-#include <algorithm>
-#include <numeric>
-#include <cmath>
-
-static double mean(const std::vector<double>& v) {
-    if (v.empty()) return 0.0;
-    double sum = std::accumulate(v.begin(), v.end(), 0.0);
-    return sum / v.size();
-}
-
-void CLIDashboard::render(
-    const std::vector<std::vector<double>>& A,
-    const std::vector<double>& y) {
-    if (A.empty() || y.empty()) return;
-
-    size_t last = std::min(A.size(), y.size()) - 1;
-    double current = y[last];
-   
-    // ---- baseline ----
-    double mu = mean(y);
-    double deviation = std::abs(current - mu);
-
-    std::string trend = "STABLE";
-    if (last > 0) {
-        if (y[last] > y[last - 1]) trend = "UP";
-        else if (y[last] < y[last - 1]) trend = "DOWN";
-    }
-
-    // ---- clear screen ----
-    std::cout << "\033[2J\033[H";
-
-    // ---- header ----
-    std::cout << "=== NETWORK MATRIX SIGNAL ANALYZER ===\n\n";
-
-    std::cout << "Current Score: " << current << "\n";
-    std::cout << "Baseline Avg : " << mu << "\n";
-    std::cout << "Deviation    : " << deviation << "\n";
-    std::cout << "Trend        : " << trend << "\n\n";
-
-    // ---- feature breakdown (last window row) ----
-    const auto& row = A[last];
-
-    std::cout << "Feature Breakdown (Window " << last << ")\n";
-
-    double packets = row.size() > 0 ? row[0] : 0;
-    double bytes   = row.size() > 1 ? row[1] : 0;
-    double tcp     = row.size() > 2 ? row[2] : 0;
-    double udp     = row.size() > 3 ? row[3] : 0;
-
-    std::cout << "Packets: ";
-    for (int i = 0; i < (int)row[0] && i < 50; i++) std::cout << "#";
-    std::cout << " (" << row[0] << ")\n";
-
-    std::cout << "Bytes  : ";
-    int bytesBars = static_cast<int>(row[1] / 100);
-    for (int i = 0; i < std::min(bytesBars, 50); i++) std::cout << "#";
-    std::cout << " (" << row[1] << ")\n";
-
-    std::cout << "TCP    : ";
-    for (int i = 0; i < (int)row[2]; i++) std::cout << "#";
-    std::cout << " (" << row[2] << ")\n";
-
-    std::cout << "UDP    : ";
-    for (int i = 0; i < (int)row[3]; i++) std::cout << "#";
-    std::cout << " (" << row[3] << ")\n\n";
-
-    // ---- signal history ----
-    std::cout << "Signal (y = Ax)\n";
-    double maxVal = *std::max_element(y.begin(), y.end());
-    if (maxVal == 0) maxVal = 1.0;
-
-    for (size_t i = 0; i < y.size(); i++) {
-        int bar = static_cast<int>((y[i] / maxVal) * 40);
-
-        std::cout << "[" << std::setw(2) << i << "] ";
-
-        for (int j = 0; j < bar; j++) std::cout << "#";
-
-        std::cout << " " << y[i] << "\n";
-    }
-
-    // ---- math reference ----
-    std::cout << "\nModel: y = Ax\n";
-} */
-
-
 #include "cli_dashboard.h"
 #include <iostream>
 #include <iomanip>
@@ -108,9 +19,9 @@ static void enableWindowsAnsi() {
 }
 #endif
  
-// ─────────────────────────────────────────────
-//  Basic 16-color ANSI only (works in CMD/PS)
-// ─────────────────────────────────────────────
+// ------------------------------------------
+//  16-color ANSI
+// ------------------------------------------
 namespace ansi {
     inline std::string clear()           { return "\033[2J\033[H"; }
     inline std::string move(int r,int c) { return "\033["+std::to_string(r)+";"+std::to_string(c)+"H"; }
@@ -141,9 +52,9 @@ namespace ansi {
  
 static int termWidth = 110;
  
-// ─────────────────────────────────────────────
+// ------------------------------------------
 //  Stat helpers
-// ─────────────────────────────────────────────
+// ------------------------------------------
 static double vecMean(const std::vector<double>& v) {
     if (v.empty()) return 0.0;
     return std::accumulate(v.begin(), v.end(), 0.0) / v.size();
@@ -153,9 +64,9 @@ static double vecMax(const std::vector<double>& v) {
     return *std::max_element(v.begin(), v.end());
 }
  
-// ─────────────────────────────────────────────
-//  ASCII box drawing (plain + chars only)
-// ─────────────────────────────────────────────
+// ------------------------------------------
+//  Box drawing 
+// ------------------------------------------
 //  +-------[ TITLE ]-------+
 //  |                       |
 //  +-----------------------+
@@ -195,9 +106,9 @@ static void clearBox(int row, int col, int h, int w) {
         std::cout << ansi::move(row+r, col+1) << blank;
 }
  
-// ─────────────────────────────────────────────
+// ------------------------------------------
 //  ASCII bar   [####.......]
-// ─────────────────────────────────────────────
+// ------------------------------------------
 static void drawBar(int pct, int width) {
     int filled = std::min(width, (pct * width) / 100);
  
@@ -213,9 +124,9 @@ static void drawBar(int pct, int width) {
     std::cout << "]" << ansi::reset();
 }
  
-// ─────────────────────────────────────────────
-//  ASCII sparkline using _.-^*
-// ─────────────────────────────────────────────
+// ------------------------------------------
+//  ASCII sparkline
+// ------------------------------------------
 static const char SPARK[] = { '_', '.', '-', '~', '^', '*', '#', '@' };
  
 static void drawSparkline(const std::vector<double>& data, int width) {
@@ -233,9 +144,9 @@ static void drawSparkline(const std::vector<double>& data, int width) {
     std::cout << ansi::reset();
 }
  
-// ─────────────────────────────────────────────
+// ------------------------------------------
 //  ASCII signal graph (vertical bars of |)
-// ─────────────────────────────────────────────
+// ------------------------------------------
 static void drawSignalGraph(int row, int col, int h, int w,
                              const std::vector<double>& y) {
     int innerW = w - 2;
@@ -245,7 +156,7 @@ static void drawSignalGraph(int row, int col, int h, int w,
  
     int start = (int)y.size() > innerW ? (int)y.size() - innerW : 0;
  
-    // build a 2D char grid
+    // 2D char grid
     std::vector<std::string> grid(innerH, std::string(innerW, ' '));
  
     for (int i = start; i < (int)y.size(); i++) {
@@ -273,9 +184,9 @@ static void drawSignalGraph(int row, int col, int h, int w,
     }
 }
  
-// ─────────────────────────────────────────────
+// ------------------------------------------
 //  Stat line helper
-// ─────────────────────────────────────────────
+// ------------------------------------------
 static void statLine(int row, int col,
                      const std::string& label,
                      const std::string& value,
@@ -287,9 +198,9 @@ static void statLine(int row, int col,
               << ansi::reset();
 }
  
-// ─────────────────────────────────────────────
+// ------------------------------------------
 //  MAIN RENDER
-// ─────────────────────────────────────────────
+// ------------------------------------------
 void CLIDashboard::render(
     const std::vector<std::vector<double>>& A,
     const std::vector<double>& y)
@@ -338,15 +249,15 @@ void CLIDashboard::render(
     // clear screen
     std::cout << "\033[2J\033[H" << ansi::reset();
  
-    // ── Title bar ────────────────────────────
+    // -- Title bar -----------------------------
     {
-        std::string title = "=== NET MATRIX SIGNAL ANALYZER ===";
+        std::string title = "=== SIGNAL ANALYZER ===";
         int pad = (termWidth - (int)title.size()) / 2;
         std::cout << ansi::move(1, pad)
                   << ansi::bcyan() << ansi::bold() << title << ansi::reset();
     }
  
-    // ── STATUS box  (rows 3-11, cols 1-38) ──
+    // -- Status Box----------------------------- 
     {
         int r=3, c=1, h=9, w=38;
         drawBox(r, c, h, w, "STATUS");
@@ -362,7 +273,7 @@ void CLIDashboard::render(
         drawSparkline(y, w - 10);
     }
  
-    // ── FEATURES box (rows 3-11, cols 40-110) ─
+    // -- FEATURES box (rows 3-11, cols 40-110)-
     {
         int r=3, c=40, h=9, w=70;
         drawBox(r, c, h, w, "FEATURES  [window " + std::to_string(last) + "]");
@@ -384,7 +295,7 @@ void CLIDashboard::render(
         featureRow(7, "UDP",     udp,     udp_pct);
     }
  
-    // ── SIGNAL GRAPH box (rows 13-27) ─────────
+    // -- SIGNAL GRAPH box (rows 13-27) --------
     {
         int r=13, c=1, h=15, w=termWidth;
         drawBox(r, c, h, w, "SIGNAL GRAPH  y = Ax");
@@ -400,7 +311,7 @@ void CLIDashboard::render(
                   << std::right << std::setw(8) << "0.0";
     }
  
-    // ── SIGNAL LOG table (rows 29-37) ─────────
+    // -- SIGNAL LOG table (rows 29-37) --------
     {
         int r=29, c=1, h=9, w=termWidth;
         int show = (int)std::min((size_t)6, y.size());
@@ -447,7 +358,7 @@ void CLIDashboard::render(
         }
     }
  
-    // ── Footer / hotkey bar ───────────────────
+    // -- Footer / hotkey bar -----------------
     {
         std::cout << ansi::move(39, 1)
                   << ansi::grey() << " Model: "
